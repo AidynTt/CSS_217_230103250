@@ -92,3 +92,24 @@ def test_fast_freight_negative_weight_isolation():
 
 
 # ---
+# --- CLIENT DISPATCHER INTEGRATION & POLYMORPHISM (TASK 3) ---
+
+def test_order_dispatcher_with_legacy_adapter():
+    adapter = OldPostalAdapter(OldPostalService())
+    dispatcher = OrderDispatcher(adapter)
+    res = dispatcher.dispatch_order("ORD-101", 2.0, "90210")
+    assert res["status"] == "DISPATCH_READY"
+    assert res["carrier"] == "OldPostalService"
+    assert res["shipping_fee"] == 22.63
+    assert res["eta_days"] == 3
+
+
+def test_order_dispatcher_with_fast_freight_adapter():
+    adapter = FastFreightAdapter(FastFreightCloud())
+    dispatcher = OrderDispatcher(adapter)
+    res = dispatcher.dispatch_order("ORD-202", 2.5, "90210")
+    assert res["status"] == "DISPATCH_READY"
+    assert res["carrier"] == "FastFreightCloud"
+    assert res["shipping_fee"] == 12.96
+    assert res["eta_days"] == 2
+
